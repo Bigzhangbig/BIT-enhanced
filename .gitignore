@@ -1,0 +1,9 @@
+# Playwright
+playwright/
+.playwright-mcp/
+
+# Node modules
+node_modules/
+
+# OS files
+.DS_Store
