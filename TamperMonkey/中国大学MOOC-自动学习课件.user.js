@@ -639,7 +639,7 @@
           <button class="btn-secondary" title="刷新统计">↻</button>
         </div>
 
-        <div class="panel-footer">ICOURSE163 AUTOLEARN v2.6</div>
+        <div class="panel-footer">ICOURSE163 AUTOLEARN v1.0.0</div>
       </div>
     `;
 
@@ -727,7 +727,7 @@
         if (items.length > 0) {
           if (!panel) {
             createPanel();
-            console.log('[AutoLearn] v2.6 loaded');
+            console.log('[AutoLearn] v1.0.0 loaded');
           } else {
             panel.style.display = '';
           }
@@ -735,6 +735,10 @@
         }
       } else {
         if (panel) panel.style.display = 'none';
+        // 离开课件页面时停止自动学习
+        if (isRunning) {
+          stopAutoLearn();
+        }
       }
       return false;
     }
