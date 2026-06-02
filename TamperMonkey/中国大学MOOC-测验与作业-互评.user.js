@@ -61,7 +61,7 @@
 
   function selectLastRadioOptions () {
     const radioGroups = {}
-    const radios = document.querySelectorAll('input[type="radio"]')
+    const radios = document.querySelectorAll('.j-homework-box input[type="radio"], .u-questionItem input[type="radio"]')
 
     radios.forEach(radio => {
       const name = radio.getAttribute('name')
@@ -154,7 +154,7 @@
     // 动态解析需要的互评份数
     const requiredMatch = allText.match(/至少为\s*(\d+)\s*份/) || allText.match(/需要互评\s*(\d+)\s*份/)
     if (requiredMatch) {
-      info.required = parseInt(requiredMatch[1])
+      info.required = parseInt(requiredMatch[1], 10)
     }
 
     // 检测已完成的互评份数 - 只统计 student 开头的行
@@ -193,7 +193,7 @@
 
     links.forEach(link => {
       const text = link.textContent?.trim()
-      if (text && text.includes('继续进行互评') || text.includes('开始进行互评')) {
+      if (text && text.includes('继续进行互评') || (text && text.includes('开始进行互评'))) {
         const row = link.closest('tr')
         if (row) {
           const isSelfReview = row.textContent.includes('mooc') ||
@@ -287,12 +287,8 @@
     if (backBtn) {
       backBtn.click()
     } else {
-      const links = document.querySelectorAll('a')
-      links.forEach(link => {
-        if (link.textContent?.trim().includes('返回')) {
-          link.click()
-        }
-      })
+      const link = Array.from(document.querySelectorAll('a')).find(l => l.textContent?.trim().includes('返回'))
+      if (link) link.click()
     }
   }
 
