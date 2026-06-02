@@ -267,7 +267,7 @@
     const ringCircle = panel.querySelector('.ring-progress');
 
     if (titleEl && title !== undefined) titleEl.textContent = title;
-    if (subEl) subEl.textContent = subtitle || '';
+    if (subEl && subtitle !== undefined) subEl.textContent = subtitle;
 
     const stats = getStats();
     const percent = pct ?? (stats.total > 0 ? Math.round((stats.learned / stats.total) * 100) : 0);
