@@ -13,7 +13,7 @@
 // ==/UserScript==
 
 // 修改说明：
-// v2.0 (Harvey/Bigzhangbig, 2024-06-02)
+// v1.2.0 (Harvey/Bigzhangbig, 2024-06-02)
 // - 新增：自动检测互评进度（已完成/需要份数）
 // - 新增：自动循环完成所有互评
 // - 新增：自动完成自评
@@ -126,10 +126,6 @@
 
   // ============ 新增功能 ============
 
-  function isHomeworkPage () {
-    return window.location.hash.includes('/learn/hw')
-  }
-
   function isReviewPage () {
     const hasRadio = document.querySelector('input[type="radio"]') !== null
     const hasTextarea = document.querySelector('.j-textarea, textarea') !== null
@@ -140,7 +136,7 @@
 
   function getReviewProgress () {
     const info = {
-      required: 6,
+      required: 6, // 默认值，会被动态解析覆盖
       completed: 0,
       remaining: 6,
       selfReviewDone: false,
@@ -154,6 +150,12 @@
     }
 
     info.hasPeerReview = true
+
+    // 动态解析需要的互评份数
+    const requiredMatch = allText.match(/至少为\s*(\d+)\s*份/) || allText.match(/需要互评\s*(\d+)\s*份/)
+    if (requiredMatch) {
+      info.required = parseInt(requiredMatch[1])
+    }
 
     // 检测已完成的互评份数 - 只统计 student 开头的行
     const rows = document.querySelectorAll('table tr, .u-table tr')
@@ -191,7 +193,7 @@
 
     links.forEach(link => {
       const text = link.textContent?.trim()
-      if (text && text.includes('继续进行互评')) {
+      if (text && text.includes('继续进行互评') || text.includes('开始进行互评')) {
         const row = link.closest('tr')
         if (row) {
           const isSelfReview = row.textContent.includes('mooc') ||
@@ -233,18 +235,17 @@
     })
 
     setTimeout(() => {
+      if (!isRunning) return // STOP 后不再提交
       const submitBtn = document.querySelector('.j-submitbtn, button[type="submit"]')
       if (submitBtn) {
         submitBtn.click()
         reviewCount++
       } else {
-        const links = document.querySelectorAll('a')
-        links.forEach(link => {
-          if (link.textContent?.trim() === '提交') {
-            link.click()
-            reviewCount++
-          }
-        })
+        const link = Array.from(document.querySelectorAll('a')).find(l => l.textContent?.trim() === '提交')
+        if (link) {
+          link.click()
+          reviewCount++
+        }
       }
     }, 500)
 
@@ -264,18 +265,17 @@
     })
 
     setTimeout(() => {
+      if (!isRunning) return // STOP 后不再提交
       const submitBtn = document.querySelector('.j-submitbtn, button[type="submit"]')
       if (submitBtn) {
         submitBtn.click()
         selfReviewDone = true
       } else {
-        const links = document.querySelectorAll('a')
-        links.forEach(link => {
-          if (link.textContent?.trim() === '提交') {
-            link.click()
-            selfReviewDone = true
-          }
-        })
+        const link = Array.from(document.querySelectorAll('a')).find(l => l.textContent?.trim() === '提交')
+        if (link) {
+          link.click()
+          selfReviewDone = true
+        }
       }
     }, 500)
 
@@ -657,7 +657,7 @@
           <button class="btn-main">START</button>
         </div>
 
-        <div class="panel-footer">AUTO PEER REVIEW v2.0</div>
+        <div class="panel-footer">AUTO PEER REVIEW v1.2.0</div>
       </div>
     `
 
@@ -766,6 +766,11 @@
     // 如果在作业页面，显示面板
     if (isHwPage && panel) {
       panel.style.display = ''
+    } else {
+      // 离开作业页面时停止自动互评
+      if (isRunning) {
+        stopAutoReview()
+      }
     }
   }
 
@@ -774,7 +779,7 @@
   function init () {
     if (!window.location.href.includes('icourse163.org')) return
 
-    console.log('[PeerReview] v2.0 loaded')
+    console.log('[PeerReview] v1.2.0 loaded')
 
     setTimeout(() => {
       main()
